@@ -15,7 +15,7 @@ jobs:
       - name: Clean up legacy processes (8080, 5432, 6379)
         run: |
           echo "Cleaning up processes on critical ports..."
-          # 殺掉佔用 App, Postgres, Redis 埠位的所有行程 (包含本地安裝的服務)
+          # 殺掉佔用 App, Postgres, Redis 埠位的所有行程 (包含本地安裝的服務) 
           sudo fuser -k 8080/tcp || true
           sudo fuser -k 5432/tcp || true
           sudo fuser -k 6379/tcp || true
