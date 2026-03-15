@@ -12,16 +12,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clean up legacy processes (Port 8080)
+      - name: Clean up legacy processes (8080, 5432, 6379)
         run: |
-          echo "Checking for processes on port 8080..."
-          # 尋找並殺掉佔用 8080 埠的行程 (例如手動執行的 java)
-          fuser -k 8080/tcp || true
+          echo "Cleaning up processes on critical ports..."
+          # 殺掉佔用 App, Postgres, Redis 埠位的所有行程 (包含本地安裝的服務)
+          sudo fuser -k 8080/tcp || true
+          sudo fuser -k 5432/tcp || true
+          sudo fuser -k 6379/tcp || true
 
-      - name: Stop and remove existing Docker containers
+      - name: Stop and remove ALL related containers
         run: |
-          # 確保舊的容器完全移除
+          # 停止目前專案的容器
           docker compose down --remove-orphans || true
+          # 額外保險：如果還有其他容器佔用 5432 或 6379，直接停止它們 (選用，視情況開啟)
+          # docker ps -q --filter "publish=5432" | xargs -r docker stop
+          # docker ps -q --filter "publish=6379" | xargs -r docker stop
 
       - name: Build and Start containers
         run: |
@@ -30,5 +35,5 @@ jobs:
       - name: Verify Running Containers
         run: |
           docker ps
-          # 檢查 8080 埠是否已經由 Docker 接手
-          netstat -tunlp | grep :8080 || true
+          echo "Checking port status..."
+          netstat -tunlp | grep -E '8080|5432|6379' || true
