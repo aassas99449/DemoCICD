@@ -1,0 +1,26 @@
+name: Local Deployment with Docker Compose
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop and remove existing containers
+        run: |
+          docker compose down || true
+
+      - name: Build and Start containers
+        # 我們在本地執行，直接用 docker compose build 並啟動
+        run: |
+          docker compose up --build -d
+
+      - name: Verify Running Containers
+        run: |
+          docker ps
